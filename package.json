@@ -1,7 +1,7 @@
 {
   "name": "ember-page-object",
-  "version": "0.0.0",
-  "description": "The default blueprint for ember-cli addons.",
+  "version": "0.0.1",
+  "description": "Create Page Objects for acceptance tests",
   "directories": {
     "doc": "doc",
     "test": "tests"
@@ -11,11 +11,11 @@
     "build": "ember build",
     "test": "ember try:testall"
   },
-  "repository": "",
+  "repository": "https://github.com/linstula/ember-page-object",
   "engines": {
     "node": ">= 0.10.0"
   },
-  "author": "",
+  "author": "Lin Reid",
   "license": "MIT",
   "devDependencies": {
     "broccoli-asset-rev": "^2.0.2",
@@ -38,7 +38,12 @@
     "ember-try": "0.0.6"
   },
   "keywords": [
-    "ember-addon"
+    "ember-addon",
+    "ember page object",
+    "ember page-object",
+    "ember-page-object",
+    "acceptance tests",
+    "testing"
   ],
   "dependencies": {
     "ember-cli-babel": "^5.0.0"
