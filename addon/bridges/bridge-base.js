@@ -1,6 +1,6 @@
 import Ember from 'ember';
 
-const { assert: emberAssert, setProperties, typeOf } = Ember;
+const { assert: emberAssert, typeOf } = Ember;
 
 export default class Bridge {
   constructor(...args) {
