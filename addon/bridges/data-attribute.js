@@ -2,7 +2,7 @@ import BridgeBase from './bridge-base';
 
 export default class DataAttributeBridge extends BridgeBase {
   constructor(attributeName = 'data-test-selector') {
-    super(...arguments);
+    super(attributeName);
   }
 
   defaultSelectorFor(value = '', filter = '') {
@@ -10,15 +10,15 @@ export default class DataAttributeBridge extends BridgeBase {
   }
 
   buttonSelector(value = '', filter = '') {
-    return this._selectorFor('button', ...arguments);
+    return this._selectorFor('button', filter, value);
   }
 
   linkSelector(value = '', filter = '') {
-    return this._selectorFor('a', ...arguments);
+    return this._selectorFor('a', filter, value);
   }
 
   inputSelector(value = '', filter = '') {
-    return this._selectorFor('input', ...arguments);
+    return this._selectorFor('input', filter, value);
   }
 
   _selectorFor(tagName, value = '', filter = '') {
