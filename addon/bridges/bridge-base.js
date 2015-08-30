@@ -1,21 +1,25 @@
 import Ember from 'ember';
 
+const { keys } = Object;
 const { assert: emberAssert, typeOf } = Ember;
 
 export default class Bridge {
-  constructor(...args) {
-    const methodsToEnforce = [ 'defaultSelectorFor', 'buttonSelector', 'linkSelector', 'inputSelector' ];
+  constructor(properties = {}) {
+    const methodsToEnforce = [ 'defaultSelector', 'buttonSelector', 'linkSelector', 'inputSelector' ];
+    const propertyNames = keys(properties);
 
-    for (let argName in args) {
-      this[argName] = args[argName];
-    }
+    propertyNames.forEach((propertyName) => {
+      this[propertyName] = properties[propertyName];
+    });
 
-    methodsToEnforce.forEach(this._enforce);
+    methodsToEnforce.forEach((methodName) => {
+      this._enforce(methodName);
+    });
   }
 
   _enforce(methodName) {
     const hasMethod = typeOf(this[methodName]) === 'function';
 
-    emberAssert(hasMethod, `You must implement a ${methodName} function on your interaction bridge.`);
+    emberAssert(`You must implement a ${methodName} function on your interaction bridge.`, hasMethod);
   }
 }
