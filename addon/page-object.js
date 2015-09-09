@@ -20,7 +20,7 @@ export default class PageObject {
   }
 
   fillInInput(rawSelector, value) {
-    return this._andThen((bridge) => {
+    return this.andThen((bridge) => {
       const inputSelector = bridge.inputSelector(rawSelector);
 
       fillIn(inputSelector, value);
@@ -28,7 +28,7 @@ export default class PageObject {
   }
 
   click(...args) {
-    return this._andThen((bridge) => {
+    return this.andThen((bridge) => {
       const selector = bridge.defaultSelector(...args);
 
       click(selector);
@@ -36,7 +36,7 @@ export default class PageObject {
   }
 
   clickButton(...args) {
-    return this._andThen((bridge) => {
+    return this.andThen((bridge) => {
       const selector = bridge.buttonSelector(...args);
 
       click(selector);
@@ -44,7 +44,7 @@ export default class PageObject {
   }
 
   clickLink(...args) {
-    return this._andThen((bridge) => {
+    return this.andThen((bridge) => {
       const selector = bridge.linkSelector(...args);
 
       click(selector);
@@ -57,7 +57,7 @@ export default class PageObject {
   }
 
   prepareResponse(path, options = {}) {
-    return this._andThen(() => {
+    return this.andThen(() => {
       let { method, response, status, headers } = options;
       method = method ? method.toLowerCase() : 'get';
       response = response || {};
@@ -70,7 +70,7 @@ export default class PageObject {
     });
   }
 
-  _andThen(callback) {
+  andThen(callback) {
     const { bridge, assert } = this;
 
     andThen(() => {
