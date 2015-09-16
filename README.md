@@ -1,4 +1,4 @@
-# Ember-page-object [![Build Status](https://travis-ci.org/linstula/ember-page-object.svg?branch=master)](https://travis-ci.org/linstula/ember-page-object)
+# Ember-page-object [![npm version](https://badge.fury.io/js/ember-page-object.svg)](http://badge.fury.io/js/ember-page-object) [![Build Status](https://travis-ci.org/linstula/ember-page-object.svg?branch=master)](https://travis-ci.org/linstula/ember-page-object)
 
 This README outlines the details of collaborating on this Ember addon.
 
