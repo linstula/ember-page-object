@@ -1,6 +1,6 @@
 {
   "name": "ember-page-object",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Create Page Objects for acceptance tests",
   "directories": {
     "doc": "doc",
