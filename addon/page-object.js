@@ -79,4 +79,67 @@ export default class PageObject {
 
     return this;
   }
+
+  /**
+   * Pauses a test so you can look around within a PageObject chain.
+   *
+   * ```js
+   *  test('foo', function(assert) {
+   *    new SomePage(assert)
+   *      .login()
+   *      .embiggen()
+   *      .pause()
+   *      .doStuff();
+   *  });
+   * ```
+   *
+   * @public
+   * @return {this}
+   */
+  pause() {
+    return this.andThen(() => {
+      // jshint ignore:start
+      return pauseTest();
+      // jshint ignore:end
+    });
+  }
+
+  /**
+   * Embiggens the testing container for easier inspection.
+   *
+   * @public
+   * @return {this}
+   */
+  embiggen() {
+    return this.andThen(() => {
+      $('#ember-testing-container').css({ width: '100vw', height: '100vh' });
+    });
+  }
+
+  /**
+   * Throws a breakpoint via debugger within a PageObject chain.
+   *
+   * ```js
+   *  test('foo', function(assert) {
+   *    new SomePage(assert)
+   *      .login()
+   *      .embiggen()
+   *      .debug()
+   *      .doStuff();
+   *  });
+   * ```
+   *
+   * @public
+   * @return {this}
+   */
+  debug() {
+    // jshint ignore:start
+    const context = this; // deopt so `this` is accessible
+    return this.andThen((applicationInstance) => {
+      console.info('Access the PageObject with `this`, and the application instance with `applicationInstance`.');
+      debugger;
+      eval();
+    });
+    // jshint ignore:end
+  }
 }
