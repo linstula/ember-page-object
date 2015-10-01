@@ -23,6 +23,18 @@ export default class PageObject {
     return this;
   }
 
+  fillIn(rawSelector, value, callback) {
+    return this.andThen((bridge) => {
+      const selector = bridge.defaultSelector(rawSelector);
+
+      fillIn(selector, value);
+
+      if (callback) {
+        callback(this.find(rawSelector));
+      }
+    });
+  }
+
   fillInInput(rawSelector, value) {
     return this.andThen((bridge) => {
       const inputSelector = bridge.inputSelector(rawSelector);
