@@ -1,5 +1,6 @@
 import Ember from 'ember';
 import DataAttributeBridge from './bridges/data-attribute';
+import replaceURLSegments from './utilities/replace-url-segments';
 
 const { assert: emberAssert } = Ember;
 
@@ -13,10 +14,25 @@ export default class PageObject {
     emberAssert('You must pass a valid interaction bridge to the Page Object!', this.bridge);
   }
 
-  visit(url) {
-    visit(url);
+  url() {
+    return '/';
+  }
 
+  visit(segments = {}) {
+    visit(replaceURLSegments(this.url(), segments));
     return this;
+  }
+
+  fillIn(rawSelector, value, callback) {
+    return this.andThen((bridge) => {
+      const selector = bridge.defaultSelector(rawSelector);
+
+      fillIn(selector, value);
+
+      if (callback) {
+        callback(this.find(rawSelector));
+      }
+    });
   }
 
   fillInInput(rawSelector, value) {
@@ -141,5 +157,9 @@ export default class PageObject {
       eval();
     });
     // jshint ignore:end
+  }
+
+  urlForSegments(segments = {}) {
+    return replaceURLSegments(this.url(), segments);
   }
 }
