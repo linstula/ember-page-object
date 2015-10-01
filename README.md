@@ -115,6 +115,19 @@ Ember.Checkbox.reopen({
 });
 ```
 
+Then import your extension file into your app.js
+```js
+// app/app.js
+
+import Ember from 'ember';
+import Resolver from 'ember/resolver';
+import loadInitializers from 'ember/load-initializers';
+import config from './config/environment';
+import './ext/data-attribute'; // add data-test-selector attribute binding to ember components
+
+// code
+```
+
 ### Custom Bridges
 If you don't want to use data attributes to target elements, you can create a custom interaction bridge.
 The bridge must implement 4 functions: `defaultSelector` `buttonSelector` `linkSelector` `inputSelector`.
