@@ -11,15 +11,51 @@ export default class PageObject {
     this.server = server;
     this.application = application;
 
-    emberAssert('You must pass a valid interaction bridge to the Page Object!', this.bridge);
+    emberAssert('You must pass a valid DOM bridge to the Page Object!', this.bridge);
   }
 
   url() {
     return '/';
   }
 
-  visit(segments = {}) {
-    visit(replaceURLSegments(this.url(), segments));
+  /**
+   * Visits a url. Accepts a url string or an object of url segment values that will be matched against the Page Object's `url()` function.
+   *
+   *
+   * ```js
+   *  test('foo', function(assert) {
+   *    new SomePage(assert)
+   *      .visit('/posts/1/comments/1')
+   *  });
+   * ```
+   *
+   * Matching against a Page Object's `url()` function:
+   * ```js
+   *  export default class SomePage extends PageObject {
+   *     url() {
+   *       return '/posts/:postID/comments/:commentID'
+   *     }
+   *   }
+   * ```
+   *
+   * ```js
+   *  test('foo', function(assert) {
+   *    new SomePage(assert)
+   *      .visit({ postID: 1, commentID: 1 })
+   *  });
+   * ```
+   *
+   * @public
+   * @return {this}
+   */
+  visit(urlOrSegments) {
+    let url = urlOrSegments;
+
+    if (typeof urlOrSegments === 'object') {
+      url = replaceURLSegments(this.url(), urlOrSegments);
+    }
+
+    visit(url);
     return this;
   }
 
