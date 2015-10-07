@@ -14,10 +14,7 @@ export default class PageObject {
     emberAssert('You must pass a valid DOM bridge to the Page Object!', this.bridge);
   }
 
-  url() {
-    return '/';
-  }
-
+// Interactions
   /**
    * Visits a url. Accepts a url string or an object of url segment values that will be matched against the Page Object's `url()` function.
    *
@@ -87,6 +84,10 @@ export default class PageObject {
     });
   }
 
+  clickByText(rawSelector, text) {
+    return this.click(rawSelector, `:contains("${text}")`);
+  }
+
   clickButton(...args) {
     return this.andThen((bridge) => {
       const selector = bridge.buttonSelector(...args);
@@ -106,6 +107,63 @@ export default class PageObject {
   find(...args) {
     const selector = this.bridge.defaultSelector(...args);
     return find(selector);
+  }
+
+  findByText(rawSelector, text) {
+    return this.find(rawSelector, `:contains("${text}")`);
+  }
+
+// Assertions
+  _assertPresent(rawSelector, bool, message = '') {
+    return this.andThen(() => {
+      message = message || `element with selector: '${this.bridge.defaultSelector(rawSelector)}' ${bool ? 'is' : 'is not'} present`;
+      this.assert.equal(!!this.find(rawSelector).length, bool, message);
+    });
+  }
+
+  _assertHasClass(rawSelector, className, bool, message = '') {
+    return this.andThen(() => {
+      message = message || `element with selector: '${this.bridge.defaultSelector(rawSelector)}' ${bool ? 'has' : 'does not have'} class: '${className}'`;
+      this.assert.equal(this.find(rawSelector).hasClass(className), bool, message);
+    });
+  }
+
+  _assertHasText(rawSelector, text, bool, message = '') {
+    return this.andThen(() => {
+      message = message || `element with selector: '${this.bridge.defaultSelector(rawSelector)}' containing text: '${text}' ${bool ? 'was found' : 'was not found'}`;
+      this.assert.equal(!!this.find(rawSelector, `:contains(${text})`).length, bool, message);
+    });
+  }
+
+  assertURL(url = '', message = '') {
+    return this.andThen(() => {
+      message = message || `current url is: '${url}'`;
+      this.assert.equal(currentURL(), url, message);
+    });
+  }
+
+  assertPresent(rawSelector = '', message = '') {
+    return this._assertPresent(rawSelector, true, message);
+  }
+
+  assertNotPresent(rawSelector = '', message = '') {
+    return this._assertPresent(rawSelector, false, message);
+  }
+
+  assertHasClass(rawSelector = '', className = '', message = '') {
+    return this._assertHasClass(rawSelector, className, true, message);
+  }
+
+  assertNotHasClass(rawSelector = '', className = '', message = '') {
+    return this._assertHasClass(rawSelector, className, false, message);
+  }
+
+  assertHasText(rawSelector = '', text = '', message = '') {
+    return this._assertHasText(rawSelector, text, true, message);
+  }
+
+  assertNotHasText(rawSelector = '', text = '', message = '') {
+    return this._assertHasText(rawSelector, text, false, message);
   }
 
   prepareResponse(path, options = {}) {
@@ -132,6 +190,7 @@ export default class PageObject {
     return this;
   }
 
+// Test Helpers
   /**
    * Pauses a test so you can look around within a PageObject chain.
    *
@@ -197,5 +256,9 @@ export default class PageObject {
 
   urlForSegments(segments = {}) {
     return replaceURLSegments(this.url(), segments);
+  }
+
+  url() {
+    return '/';
   }
 }
