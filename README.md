@@ -1,165 +1,284 @@
 # Ember-page-object [![npm version](https://badge.fury.io/js/ember-page-object.svg)](http://badge.fury.io/js/ember-page-object) [![Build Status](https://travis-ci.org/linstula/ember-page-object.svg?branch=master)](https://travis-ci.org/linstula/ember-page-object)
 
 A base Page Object class with helper functions and generators to help implement the Page Object pattern for your tests.
-Built in support for using data attributes to target elements during tests.
 Option to run assertions in your Page Objects.
+
+* [Usage](#usage)
+* [Helpers](#helpers)
 
 ## Usage
 ```sh
 ember install ember-page-object
-ember generate page-object post
+ember generate page-object signup
 ```
 
 Generated Page Object:
 
 ```js
-// tests/page-objects/post.js
+// tests/page-objects/signup.js
 
 import PageObject from 'ember-page-object';
 
-export default class PostPage extends PageObject {
+export default class SignupPage extends PageObject {
 }
 ```
 
 ### Customizing your Page Object
-The base Page Object wraps many of Ember's [acceptance test helpers](), allowing for function chaining and customizations via [interaction bridges]().
-To flesh out your page object, extend the base Page Object and use the wrapped helper functions.
-You can find the fully documented list of helpers [here]().
-
-By default, the base Page Object uses the DataAttribute interaction bridge.
-This means that the helper functions will target elements with the specified data attribute (default data attribute is `data-test-selector`).
-`PageObject.find('blog-post')` would delegate to Ember's `find` test helper: `find('[data-test-selector="blog-post"]')`.
+The base Page Object wraps several of Ember's [acceptance test helpers](http://guides.emberjs.com/v2.1.0/testing/acceptance/#toc_test-helpers), allowing for function chaining.
+It also provides some of it's own helper functions which are documented [here](#helpers).
+To flesh out your page object, extend the base Page Object and use the built in helpers.
 
 ```js
-// tests/page-objects/post.js
+// tests/page-objects/signup.js
 
 import PageObject from 'ember-page-object';
 
-export default class PostPage extends PageObject {
-  visit(id) {
-    visit(`posts/${id}`)
-    return this;
+export default class SignupPage extends PageObject {
+  fillInEmail(text) {
+    return this.fillIn('#email', text);
   }
 
-  fillInComment(text) {
-    return this.fillIn('post-comment-input', text);
+  fillInPassword(text) {
+    return this.fillIn('#password', text);
   }
 
-  clickCommentButton() {
-    return this.click('post-comment-button');
+  clickSignUp() {
+    return this.click('#sign-up');
   }
+}
+```
 
-  assertCommentVisible(text) {
+```js
+// tests/acceptance/signup-test.js
+import SignupPage from '../page-objects/signup';
+
+// other test code
+
+test('user can sign up', function(assert) {
+  assert.expect(1);
+
+  new SignupPage({ assert })
+    .visit('/signup')
+    .fillInEmail('email@example.com')
+    .fillInPassword('password')
+    .clickSignUp()
+    .assertURL('/profile', 'user is redirected to their profile after signup');
+});
+```
+
+## Helpers
+Page Objects extending from the base PageObject have access to a number of helper functions.
+All functions return the page object instance to allow function chaining.
+
+[Wrapped Test Helpers](#wrapped-test-helpers)
+* [andThen()](#andthen)
+* [click()](#click)
+* [fillIn()](#fillin)
+
+[Assertions](#assertions)
+* [assertURL()](#asserturl)
+* [assertHasClass()](#asserthasclass)
+* [assertNotHasClass()](#assertnothasclass)
+* [assertHasText()](#asserthastext)
+* [assertNotHasText()](#assertnothastext)
+* [assertPresent()](#assertpresent)
+* [assertNotPresent()](#assertnotpresent)
+
+[Debugging](#debugging)
+* [embiggen()](#embiggen)
+* [debug()](#debug)
+* [pause()](#pause)
+
+
+## Wrapped Test Helpers
+### andThen()
+`andThen(callback)`
+
+Wraps Ember's [andThen()](http://guides.emberjs.com/v2.1.0/testing/acceptance/#toc_wait-helpers) test helper.
+
+```js
+export default class SignupPage extends PageObject {
+  assertSignupFailure(errorMessage) {
     return this.andThen(() => {
-      this.assert.equal(this.find('post-comment', ':contains("great post!")').length, 1, `post with text: ${text} is visible`);
+      this.assertHasText('.flash-warning', errorMessage);
+      this.assertURL('/signup');
     });
   }
 }
 ```
 
-### Test
+### click()
+`click(selector = '')`
+
+Wraps Ember's [click()](http://emberjs.com/api/classes/Ember.Test.html#method_click) test helper.
 
 ```js
-import PostPage from '../page-objects/post'; // adjust path based on nested depth of test
-
-// other test code
-
-test('user can comment on a blog post', function(assert) {
-  assert.expect(1);
-
-  new PostPage({ assert })
-    .visit(1)
-    .fillInComment('great post!')
-    .clickCommentButton()
-    .assertCommentVisible('great post!');
-});
-```
-
-## Interaction Bridges
-Each app has it's own defaults for how it finds elements to interact with during tests.
-These defaults are specified in an interaction bridge.
-The Page Object will defer to the interaction bridge to build the selector for a given interaction.
-The intent behind having an interaction bridge is to decouple a desired action (`find`, `click`, `fillIn`) with the details of how that action is performed.
-The arguments for each Page Object interaction helper will be passed to the bridge to be turned into a selector which is passed to the corresponding Ember test helper.
-
-### DataAttribute Interaction Bridge
-The default interaction bridge used by the base Page Object is the DataAttribute bridge.
-The DataAttribute bridge expects that you have added a [data attrbiute](https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Using_data_attributes) to elements that will be interacted with during tests.
-Using data attributes to target elements during tests allows for more robust acceptance tests.
-For a more detailed discussion, see [this post](https://dockyard.com/blog/2015/09/25/ember-best-practices-acceptance-tests).
-
-### Extending Ember Helpers for Data Attributes
-Ember's template helpers, like the `{{link-to}}` and `{{input}}` helpers, don't bind to data attributes by default.
-If you want to add data attributes to these helpers so they can be targeted with the DataAttribute bridge, you can extend them:
-
-```js
-// ext/data-attribute.js
-
-import Ember from 'ember';
-const attributeName = 'data-test-selector';
-
-Ember.LinkComponent.reopen({
-  attributeBindings: [attributeName]
-});
-
-Ember.TextField.reopen({
-  attributeBindings: [attributeName]
-});
-
-Ember.TextArea.reopen({
-  attributeBindings: [attributeName]
-});
-
-Ember.Checkbox.reopen({
-  attributeBindings: [attributeName]
-});
-```
-
-Then import your extension file into your app.js
-```js
-// app/app.js
-
-import Ember from 'ember';
-import Resolver from 'ember/resolver';
-import loadInitializers from 'ember/load-initializers';
-import config from './config/environment';
-import './ext/data-attribute'; // add data-test-selector attribute binding to ember components
-
-// code
-```
-
-### Custom Bridges
-If you don't want to use data attributes to target elements, you can create a custom interaction bridge.
-The bridge must implement 4 functions: `defaultSelector` `buttonSelector` `linkSelector` `inputSelector`.
-These bridges will receive the arguments passed into the Page Object interaction helpers and should return a jquery selector that will be passed to Ember's test helpers.
-See the implementation for the DataAttribute bridge for an example bridge.
-
-```js
-// tests/bridges/my-custom-bridge
-
-import BridgeBase from './bridge-base';
-
-export default class MyCustomBridge extends BridgeBase {
-  defaultSelector(value = '', filter = '') {
-    return `[${this.attributeName}="${value}"]${filter}`;
-  }
-
-  buttonSelector(value = '', filter = '') {
-    return this._selectorFor('button', value, filter);
-  }
-
-  linkSelector(value = '', filter = '') {
-    return this._selectorFor('a', value, filter);
-  }
-
-  inputSelector(value = '', filter = '') {
-    return this._selectorFor('input', value, filter);
-  }
-
-  _selectorFor(tagName, value = '', filter = '') {
-    return `${tagName}${this.defaultSelector(value, filter)}`;
+export default class SignupPage extends PageObject {
+  clickSignUp() {
+    return this.click('#sign-up');
   }
 }
+```
+
+### fillIn()
+`fillIn(selector = '', text = '')`
+
+Wraps Ember's [fillIn()](http://emberjs.com/api/classes/Ember.Test.html#method_fillIn) test helper.
+
+```js
+export default class SignupPage extends PageObject {
+  fillInEmail(text) {
+    return this.fillIn('#email', text);
+  }
+}
+```
+
+## Assertions
+### assertURL()
+`assertURL(url = '', message = '')`
+
+Asserts that the passed in url is the current url. Accepts an optional assertion message.
+
+```js
+test('"/profile" redirects to "/sign-in" when user is not signed in', function(assert) {
+  assert.expect(1);
+
+  new ProfilePage({ assert })
+    .visit('/profile')
+    .assertURL('/sign-in', 'user is redirected to "/sign-in"');
+});
+```
+
+### assertHasClass()
+`assertHasClass(selector = '', class = '', message = '')`
+
+Asserts the element matching the selector has the passed in class. Accepts an optional assertion message.
+
+```js
+export default class SignupPage extends PageObject {
+  assertInvalidEmail() {
+    return this.assertHasClass('#email', '.is-invalid');
+  }
+}
+```
+
+### assertNotHasClass()
+`assertNotHasClass(selector = '', class = '', message = '')`
+
+Asserts the element matching the selector does not have the passed in class. Accepts an optional assertion message.
+
+```js
+export default class SignupPage extends PageObject {
+  assertSubmitEnabled() {
+    return this.assertNotHasClass('#submit-button', '.disabled');
+  }
+}
+```
+
+### assertHasText()
+`assertHasText(selector = '', text = '', message = '')`
+
+Asserts the element matching the selector contains the passed in text. Accepts an optional assertion message.
+
+```js
+export default class SignupPage extends PageObject {
+  assertFlashMessage(text) {
+    return this.assertHasText('.flash', text, `flash message with text: ${text} is displayed`);
+  }
+}
+```
+
+### assertNotHasText()
+`assertNotHasText(selector = '', text = '', message = '')`
+
+Asserts the element matching the selector does not contain the passed in text. Accepts an optional assertion message.
+
+```js
+export default class SignupPage extends PageObject {
+  assertNotAdminUI() {
+    return this.assertNotHasText('.banner', 'Admin', 'admin UI is not visible');
+  }
+}
+```
+
+### assertPresent()
+`assertPresent(selector = '', message = '')`
+
+Asserts an element matching the selector can be found. Accepts an optional assertion message.
+
+```js
+export default class SignupPage extends PageObject {
+  assertSignedOutNav() {
+    return this.assertPresent('.nav .sign-in-button', 'nav bar displays sign in button');
+  }
+}
+```
+
+### assertNotPresent()
+`assertNotPresent(selector = '', message = '')`
+
+Asserts an element matching the selector is not found. Accepts an optional assertion message.
+
+```js
+export default class SignupPage extends PageObject {
+  assertSignedInNav() {
+    return this.assertNotPresent('.nav .sign-in-button', 'nav bar does not display sign in button');
+  }
+}
+```
+
+## Debugging
+### embiggen()
+`embiggen()`
+
+Embiggens the testing container for easier inspection.
+
+```js
+test('a test that is being debugged', function(assert) {
+  assert.expect(1);
+
+  new PageObject({ assert })
+    .visit('/')
+    .doStuff()
+    .embiggen()
+    .pause()
+    .breakingCode()
+});
+```
+
+### debugger()
+`debugger()`
+
+Throws a breakpoint via debugger within a PageObject chain.
+
+```js
+test('a test that is being debugged', function(assert) {
+  assert.expect(1);
+
+  new PageObject({ assert })
+    .visit('/')
+    .doStuff()
+    .debugger()
+    .breakingCode()
+});
+```
+
+### pause()
+`pause()`
+
+Pauses a test so you can look around within a PageObject chain.
+
+```js
+test('a test that is being debugged', function(assert) {
+  assert.expect(1);
+
+  new PageObject({ assert })
+    .visit('/')
+    .doStuff()
+    .embiggen()
+    .pause()
+    .breakingCode()
+});
 ```
 
 ## Installation
