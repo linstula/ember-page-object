@@ -79,10 +79,11 @@ test('fillIn gets a selector via toSelector', function(assert) {
 });
 
 test('fillIn delegates to the fillIn test helper', function(assert) {
-  assert.expect(3);
+  assert.expect(4);
 
-  sandbox.stub(window, 'fillIn', (selector, text) => {
+  sandbox.stub(window, 'fillIn', (selector, context, text) => {
     assert.equal(selector, 'some-selector', 'fillIn was called with correct selector');
+    assert.equal(context, undefined, 'no context was passed in');
     assert.equal(text, 'foobar', 'fillIn was called with the correct text');
   });
 

@@ -1,7 +1,4 @@
-import Ember from 'ember';
 import replaceURLSegments from './utilities/replace-url-segments';
-
-const { assert: emberAssert } = Ember;
 
 export default class PageObject {
   constructor({ assert, application } = {}) {
@@ -55,7 +52,7 @@ export default class PageObject {
     return this;
   }
 
-  fillIn(rawSelector = '', contextOrText = '', text = '', callback) {
+  fillIn(rawSelector, contextOrText, text, callback) {
     return this.andThen(() => {
       let context;
       const selector = this.toSelector(rawSelector);
@@ -77,7 +74,7 @@ export default class PageObject {
     });
   }
 
-  click(rawSelector = '', context) {
+  click(rawSelector, context) {
     return this.andThen(() => {
       const selector = this.toSelector(rawSelector);
 
@@ -85,7 +82,7 @@ export default class PageObject {
     });
   }
 
-  clickByText(rawSelector = '', context, text) {
+  clickByText(rawSelector, context, text) {
     if (typeof text === 'undefined') {
       text = context;
       context = undefined;
@@ -95,12 +92,12 @@ export default class PageObject {
     return this;
   }
 
-  find(rawSelector = '', context) {
+  find(rawSelector, context) {
     const selector = this.toSelector(rawSelector);
     return find(selector, context);
   }
 
-  findByText(rawSelector = '', context, text) {
+  findByText(rawSelector, context, text) {
     if (typeof text === 'undefined') {
       text = context;
       context = undefined;
