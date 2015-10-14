@@ -143,23 +143,29 @@ component, which drives the `{{input}}` helper, and add an attribute binding for
 You many also want to do this for other components (eg. `Ember.LinkComponent` and `Ember.TextArea`).
 
 ```js
-// app/ext/data-attribute.js
+// app/initializers/data-attribute.js
 
 import Ember from 'ember';
 
-const attributeName = 'data-auto-id';
+export default {
+  name: 'data-attribute',
 
-Ember.TextField.reopen({
-  attributeBindings: [attributeName]
-});
+  initialize() {
+    const attributeName = 'data-auto-id';
 
-Ember.LinkComponent.reopen({
-  attributeBindings: [attributeName]
-});
+    Ember.TextField.reopen({
+      attributeBindings: [attributeName]
+    });
 
-Ember.TextArea.reopen({
-  attributeBindings: [attributeName]
-});
+    Ember.LinkComponent.reopen({
+      attributeBindings: [attributeName]
+    });
+
+    Ember.TextArea.reopen({
+      attributeBindings: [attributeName]
+    });
+  }
+};
 ```
 
 ## Helpers
