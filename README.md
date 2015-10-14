@@ -2,6 +2,8 @@
 
 A base Page Object class with helper functions and generators to help implement the Page Object pattern for your tests.
 Option to run assertions in your Page Objects.
+For some additional reading on Page Objects and how they can help your
+tests, see this [blog post](https://dockyard.com/blog/2015/09/25/ember-best-practices-acceptance-tests).
 
 * [Usage](#usage)
 * [Using data attributes in tests](#data-attributes)
