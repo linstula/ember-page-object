@@ -5,10 +5,9 @@ import replaceURLSegments from './utilities/replace-url-segments';
 const { assert: emberAssert } = Ember;
 
 export default class PageObject {
-  constructor({ assert, server, application, bridge } = {}) {
+  constructor({ assert, application, bridge } = {}) {
     this.assert = assert;
     this.bridge = bridge || new DataAttributeBridge();
-    this.server = server;
     this.application = application;
 
     emberAssert('You must pass a valid DOM bridge to the Page Object!', this.bridge);
@@ -16,7 +15,7 @@ export default class PageObject {
 
 // Interactions
   /**
-   * Visits a url. Accepts a url string or an object of url segment values that will be matched against the Page Object's `url()` function.
+   * Visits a url. Accepts a url string or an object of url segment values that will be matched against the Page Object's `url()` function
    *
    *
    * ```js
@@ -68,14 +67,6 @@ export default class PageObject {
     });
   }
 
-  fillInInput(rawSelector, value) {
-    return this.andThen((bridge) => {
-      const inputSelector = bridge.inputSelector(rawSelector);
-
-      fillIn(inputSelector, value);
-    });
-  }
-
   click(...args) {
     return this.andThen((bridge) => {
       const selector = bridge.defaultSelector(...args);
@@ -86,22 +77,6 @@ export default class PageObject {
 
   clickByText(rawSelector, text) {
     return this.click(rawSelector, `:contains("${text}")`);
-  }
-
-  clickButton(...args) {
-    return this.andThen((bridge) => {
-      const selector = bridge.buttonSelector(...args);
-
-      click(selector);
-    });
-  }
-
-  clickLink(...args) {
-    return this.andThen((bridge) => {
-      const selector = bridge.linkSelector(...args);
-
-      click(selector);
-    });
   }
 
   find(...args) {
@@ -164,20 +139,6 @@ export default class PageObject {
 
   assertNotHasText(rawSelector = '', text = '', message = '') {
     return this._assertHasText(rawSelector, text, false, message);
-  }
-
-  prepareResponse(path, options = {}) {
-    return this.andThen(() => {
-      let { method, response, status, headers } = options;
-      method = method ? method.toLowerCase() : 'get';
-      response = response || {};
-      status = status || 200;
-      headers = headers || { 'Content-Type': 'application/vnd.api+json' };
-
-      this.server[method](path, () => {
-        return [status, headers, JSON.stringify(response)];
-      });
-    });
   }
 
   andThen(callback) {
