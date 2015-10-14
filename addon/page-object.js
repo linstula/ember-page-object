@@ -1,16 +1,16 @@
 import Ember from 'ember';
-import DataAttributeBridge from './bridges/data-attribute';
 import replaceURLSegments from './utilities/replace-url-segments';
 
 const { assert: emberAssert } = Ember;
 
 export default class PageObject {
-  constructor({ assert, application, bridge } = {}) {
+  constructor({ assert, application } = {}) {
     this.assert = assert;
-    this.bridge = bridge || new DataAttributeBridge();
     this.application = application;
+  }
 
-    emberAssert('You must pass a valid DOM bridge to the Page Object!', this.bridge);
+  toSelector(selector = '') {
+    return selector;
   }
 
 // Interactions
@@ -55,58 +55,82 @@ export default class PageObject {
     return this;
   }
 
-  fillIn(rawSelector, value, callback) {
-    return this.andThen((bridge) => {
-      const selector = bridge.defaultSelector(rawSelector);
+  fillIn(rawSelector = '', contextOrText = '', text = '', callback) {
+    return this.andThen(() => {
+      let context;
+      const selector = this.toSelector(rawSelector);
 
-      fillIn(selector, value);
+      if (typeof text === 'undefined') {
+        text = contextOrText;
+      } else if (typeof text === 'function') {
+        callback = text;
+        text = contextOrText;
+      } else {
+        context = contextOrText;
+      }
+
+      fillIn(selector, context, text);
 
       if (callback) {
-        callback(this.find(rawSelector));
+        callback(find(selector, context));
       }
     });
   }
 
-  click(...args) {
-    return this.andThen((bridge) => {
-      const selector = bridge.defaultSelector(...args);
+  click(rawSelector = '', context) {
+    return this.andThen(() => {
+      const selector = this.toSelector(rawSelector);
 
-      click(selector);
+      click(selector, context);
     });
   }
 
-  clickByText(rawSelector, text) {
-    return this.click(rawSelector, `:contains("${text}")`);
+  clickByText(rawSelector = '', context, text) {
+    if (typeof text === 'undefined') {
+      text = context;
+      context = undefined;
+    }
+
+    click(`${this.toSelector(rawSelector)}:contains("${text}")`, context);
+    return this;
   }
 
-  find(...args) {
-    const selector = this.bridge.defaultSelector(...args);
-    return find(selector);
+  find(rawSelector = '', context) {
+    const selector = this.toSelector(rawSelector);
+    return find(selector, context);
   }
 
-  findByText(rawSelector, text) {
-    return this.find(rawSelector, `:contains("${text}")`);
+  findByText(rawSelector = '', context, text) {
+    if (typeof text === 'undefined') {
+      text = context;
+      context = undefined;
+    }
+
+    return find(`${this.toSelector(rawSelector)}:contains("${text}")`, context);
   }
 
 // Assertions
   _assertPresent(rawSelector, bool, message = '') {
     return this.andThen(() => {
-      message = message || `element with selector: '${this.bridge.defaultSelector(rawSelector)}' ${bool ? 'is' : 'is not'} present`;
+      message = message || `element with selector: '${this.toSelector(rawSelector)}' ${bool ? 'is' : 'is not'} present`;
       this.assert.equal(!!this.find(rawSelector).length, bool, message);
     });
   }
 
   _assertHasClass(rawSelector, className, bool, message = '') {
     return this.andThen(() => {
-      message = message || `element with selector: '${this.bridge.defaultSelector(rawSelector)}' ${bool ? 'has' : 'does not have'} class: '${className}'`;
+      message = message || `element with selector: '${this.toSelector(rawSelector)}' ${bool ? 'has' : 'does not have'} class: '${className}'`;
       this.assert.equal(this.find(rawSelector).hasClass(className), bool, message);
     });
   }
 
   _assertHasText(rawSelector, text, bool, message = '') {
     return this.andThen(() => {
-      message = message || `element with selector: '${this.bridge.defaultSelector(rawSelector)}' containing text: '${text}' ${bool ? 'was found' : 'was not found'}`;
-      this.assert.equal(!!this.find(rawSelector, `:contains(${text})`).length, bool, message);
+      message = message || `element with selector: '${this.toSelector(rawSelector)}' containing text: '${text}' ${bool ? 'was found' : 'was not found'}`;
+      const elementText = this.find(rawSelector).text();
+      const hasText = elementText.indexOf(text) > -1;
+
+      this.assert.equal(hasText, bool, message);
     });
   }
 
@@ -142,10 +166,10 @@ export default class PageObject {
   }
 
   andThen(callback) {
-    const { bridge, assert } = this;
+    const { assert } = this;
 
     andThen(() => {
-      callback.call(this, bridge, assert);
+      callback.call(this, assert);
     });
 
     return this;
