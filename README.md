@@ -4,6 +4,7 @@ A base Page Object class with helper functions and generators to help implement 
 Option to run assertions in your Page Objects.
 
 * [Usage](#usage)
+* [Using data attributes in tests](#data-attributes)
 * [Helpers](#helpers)
 
 ## Usage
@@ -63,6 +64,101 @@ test('user can sign up', function(assert) {
     .fillInPassword('password')
     .clickSignUp()
     .assertURL('/profile', 'user is redirected to their profile after signup');
+});
+```
+
+### Data Attributes
+If you want to use data attributes to decouple your tests from your
+application's presentation as described in [this blog post](https://dockyard.com/blog/2015/09/25/ember-best-practices-acceptance-tests),
+you can overwrite the `toSelector` function in your page object. The
+`toSelector` function is a hook that allows you to modify the selector
+that is passed in to the various helper functions.
+
+By default, `toSelector` does not modify the selector at all. Below is a simple
+example of modifying `toSelector` so helper functions target the
+`data-auto-id` data attribute during tests.
+
+```hbs
+  {{! signup template}}
+
+  {{input value=email data-auto-id="signup-email"}}
+  {{input value=password data-auto-id="signup-password"}}
+  <button data-auto-id="signup-button">Submit</button>
+
+  {{! other code}}
+```
+
+```js
+// tests/page-objects/base.js
+
+import PageObject from 'ember-page-object';
+
+export default class BasePageObject extends PageObject {
+  toSelector(rawSelector) {
+    return `[data-auto-id="${rawSelector}"]`;
+  }
+}
+```
+
+```js
+// tests/page-objects/signup.js
+
+import BasePageObject from './base';
+
+export default class SignupPageObject extends BasePageObject {
+  clickSignUp() {
+    return this.click('signup-button');
+  }
+
+  fillInEmail(email) {
+    return this.fillIn('signup-email', email);
+  }
+
+  fillInPassword(password) {
+    return this.fillIn('signup-password', password);
+  }
+}
+```
+
+```js
+// tests/acceptance/signup-test.js
+import SignupPage from '../page-objects/signup';
+
+// other test code
+
+test('user can sign up', function(assert) {
+  assert.expect(1);
+
+  new SignupPage({ assert })
+    .visit('/signup')
+    .fillInEmail('email@example.com')
+    .fillInPassword('password')
+    .clickSignUp()
+    .assertURL('/profile', 'user is redirected to their profile after signup');
+});
+```
+
+For this example to work, you'll also have to extend the `TextField`
+component, which drives the `{{input}}` helper, and add an attribute binding for the data-auto-id attribute.
+You many also want to do this for other components (eg. `Ember.LinkComponent` and `Ember.TextArea`).
+
+```js
+// app/ext/data-attribute.js
+
+import Ember from 'ember';
+
+const attributeName = 'data-auto-id';
+
+Ember.TextField.reopen({
+  attributeBindings: [attributeName]
+});
+
+Ember.LinkComponent.reopen({
+  attributeBindings: [attributeName]
+});
+
+Ember.TextArea.reopen({
+  attributeBindings: [attributeName]
 });
 ```
 
