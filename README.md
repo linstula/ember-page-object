@@ -20,7 +20,7 @@ Generated Page Object:
 ```js
 // tests/page-objects/signup.js
 
-import PageObject from 'ember-page-object';
+import PageObject from '../page-object';
 
 export default class SignupPage extends PageObject {
 }
@@ -34,7 +34,7 @@ To flesh out your page object, extend the base Page Object and use the built in 
 ```js
 // tests/page-objects/signup.js
 
-import PageObject from 'ember-page-object';
+import PageObject from '../page-object';
 
 export default class SignupPage extends PageObject {
   fillInEmail(text) {
@@ -93,7 +93,7 @@ example of modifying `toSelector` so helper functions target the
 ```js
 // tests/page-objects/base.js
 
-import PageObject from 'ember-page-object';
+import PageObject from '../page-object';
 
 export default class BasePageObject extends PageObject {
   toSelector(rawSelector) {

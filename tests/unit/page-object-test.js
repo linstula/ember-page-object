@@ -1,5 +1,5 @@
 import { module, test } from 'qunit';
-import PageObject from 'ember-page-object';
+import PageObject from '../page-object';
 import sinon from 'sinon';
 
 let sandbox;
