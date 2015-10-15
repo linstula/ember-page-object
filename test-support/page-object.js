@@ -1,4 +1,4 @@
-import replaceURLSegments from './utilities/replace-url-segments';
+import replaceURLSegments from './ember-page-object/replace-url-segments';
 
 export default class PageObject {
   constructor({ assert, application } = {}) {
