@@ -331,6 +331,32 @@ export default class SignupPage extends PageObject {
 }
 ```
 
+### assertHasValue()
+`assertHasValue(selector = '', text = '', message = '')`
+
+Asserts the element's value matching the selector contains the passed in text. Accepts an optional assertion message.
+
+```js
+export default class SignupPage extends PageObject {
+  assertInputName(text) {
+    return this.assertHasValue('#name', text, `input with elementId 'name' has value: ${text}`);
+  }
+}
+```
+
+### assertNotHasValue()
+`assertNotHasValue(selector = '', text = '', message = '')`
+
+Asserts the element's value matching the selector does not contain the passed in text. Accepts an optional assertion message.
+
+```js
+export default class SignupPage extends PageObject {
+  assertNotInputName(text) {
+    return this.assertNotHasValue('#name', text, `input with elementId 'name' does not have value: ${text}`);
+  }
+}
+```
+
 ## Debugging
 ### embiggen()
 `embiggen()`

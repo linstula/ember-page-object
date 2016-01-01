@@ -131,6 +131,16 @@ export default class PageObject {
     });
   }
 
+  _assertHasValue(rawSelector, text, bool, message = '') {
+    return this.andThen(() => {
+      message = message || `element with selector: '${this.toSelector(rawSelector)}' containing value: '${text}' ${bool ? 'was found' : 'was not found'}`;
+      const elementValue = this.find(rawSelector).val();
+      const hasValue = elementValue.indexOf(text) > -1;
+
+      this.assert.equal(hasValue, bool, message);
+    });
+  }
+
   assertURL(url = '', message = '') {
     return this.andThen(() => {
       message = message || `current url is: '${url}'`;
@@ -160,6 +170,14 @@ export default class PageObject {
 
   assertNotHasText(rawSelector = '', text = '', message = '') {
     return this._assertHasText(rawSelector, text, false, message);
+  }
+
+  assertHasValue(rawSelector = '', text = '', message = '') {
+    return this._assertHasValue(rawSelector, text, true, message);
+  }
+
+  assertNotHasValue(rawSelector = '', text = '', message = '') {
+    return this._assertHasValue(rawSelector, text, false, message);
   }
 
   andThen(callback) {
