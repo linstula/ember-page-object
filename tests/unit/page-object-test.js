@@ -483,3 +483,57 @@ test('assertNotHasText calls `assert.equal` passing in whether or not the elemen
 
   pageObject.assertNotHasText('some-selector', 'the element doesnt have this text', 'some message');
 });
+
+test('assertHasValue calls `assert.equal` passing in whether or not the element value has the passed in text', function(assert) {
+  assert.expect(5);
+
+  sandbox.stub(window, 'find', () => {
+    const fakeElement = {
+      val() {
+        assert.ok(true, 'value was called on the element returned from find');
+        return 'This is the element value!';
+      }
+    };
+
+    return fakeElement;
+  });
+
+  const mockAssert = {
+    equal(actual, expected, message) {
+      assert.equal(actual, true, 'passed in a bool representing whether or not the element value contained the passed in text');
+      assert.equal(expected, true, 'passes in a bool representing that the value of the element is expected to have the passed in text');
+      assert.equal(message, 'some message', 'passes in an optional message');
+    }
+  };
+
+  const pageObject = new PageObject({ assert: mockAssert });
+
+  pageObject.assertHasValue('some-selector', 'This is the element value!', 'some message');
+});
+
+test('assertNotHasValue calls `assert.equal` passing in whether or not the element value has the passed in text', function(assert) {
+  assert.expect(5);
+
+  sandbox.stub(window, 'find', () => {
+    const fakeElement = {
+      val() {
+        assert.ok(true, 'value was called on the element returned from find');
+        return 'This is the element value!';
+      }
+    };
+
+    return fakeElement;
+  });
+
+  const mockAssert = {
+    equal(actual, expected, message) {
+      assert.equal(actual, false, 'passed in a bool representing whether or not the element value contained the passed in text');
+      assert.equal(expected, false, 'passes in a bool representing that the element value is expected to not have the passed in text');
+      assert.equal(message, 'some message', 'passes in an optional message');
+    }
+  };
+
+  const pageObject = new PageObject({ assert: mockAssert });
+
+  pageObject.assertNotHasValue('some-selector', 'the element doesnt have this value', 'some message');
+});
